@@ -1,0 +1,11 @@
+<h2>Добро пожаловать{% if username %}, {{ username }}{% endif %}!</h2>
+
+{% if username %}
+  <p><a href="/my_workouts_html">Мои тренировки</a></p>
+  <p><a href="/upload">Создать тренировку</a></p>
+  <p><a href="/search">Найти тренировки по имени</a></p>
+  <p><a href="/logout">Выйти</a></p>
+{% else %}
+  <p><a href="/login_html">Войти</a> | <a href="/register_html">Создать аккаунт</a></p>
+  <p><a href="/search">Найти тренировки по имени</a></p>
+{% endif %}

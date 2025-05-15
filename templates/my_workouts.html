@@ -1,0 +1,8 @@
+<h2>Мои тренировки</h2>
+<ul>
+  {% for w in workouts %}
+    <li>
+      <b>{{ w.training_name }}</b> — {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин
+    </li>
+  {% endfor %}
+</ul>

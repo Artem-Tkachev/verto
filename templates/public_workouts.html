@@ -1,0 +1,13 @@
+<h2>Тренировки пользователя {{ username }}</h2>
+
+{% if workouts %}
+  <ul>
+    {% for w in workouts %}
+      <li><b>{{ w.training_name }}</b> — {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>У пользователя пока нет тренировок</p>
+{% endif %}
+
+<p><a href="/search">Поиск другого пользователя</a> | <a href="/">На главную</a></p>
