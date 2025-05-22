@@ -1,0 +1,14 @@
+<h2>Избранные маршруты</h2>
+{% if workouts %}
+  <ul>
+    {% for w in workouts %}
+      <li>
+        <b>{{ w.training_name }}</b> — {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>У вас нет избранных маршрутов.</p>
+{% endif %}
+
+<p><a href="/">На главную</a></p>

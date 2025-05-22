@@ -169,6 +169,46 @@ def public_workouts(username):
     user_workouts = [w for w in workouts if w["user_name"] == username]
     return render_template('public_workouts.html', username=username, workouts=user_workouts)
 
+@app.route('/favorite/<route_id>', methods=['POST'])
+def toggle_favorite(route_id):
+    token = session.get('token')
+    if not token:
+        return "Вы не авторизованы", 401
+
+    from flask_jwt_extended import decode_token
+    username = decode_token(token)['sub']
+
+    if username not in users:
+        return "Пользователь не найден", 404
+
+    if "favorite_routes" not in users[username]:
+        users[username]["favorite_routes"] = []
+
+    if route_id in users[username]["favorite_routes"]:
+        users[username]["favorite_routes"].remove(route_id)
+    else:
+        users[username]["favorite_routes"].append(route_id)
+
+    save_users(users)
+    return redirect(url_for('index'))
+
+@app.route('/favorites')
+def show_favorites():
+    token = session.get('token')
+    if not token:
+        return redirect(url_for('login_html'))
+
+    from flask_jwt_extended import decode_token
+    username = decode_token(token)['sub']
+
+    if username not in users:
+        return "Пользователь не найден", 404
+
+    fav_ids = users[username].get("favorite_routes", [])
+    fav_workouts = [w for w in workouts if w.get("id") in fav_ids]
+
+    return render_template('favorites.html', workouts=fav_workouts)
+
 if __name__ == '__main__':
     port = 8080
     app.run(app, host='0.0.0.0', port=port)
