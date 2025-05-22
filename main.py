@@ -42,6 +42,20 @@ def register():
     save_users(users)
     return jsonify({"msg": "User registered"}), 201
 
+@app.route('/register_html', methods=['GET', 'POST'])
+def register_html():
+    if request.method == 'POST':
+        data = request.form
+        username = data.get("username")
+        if username in users:
+            return "User already exists"
+        users[username] = {
+            "password": generate_password_hash(data.get("password"))
+        }
+        save_users(users)
+        return redirect(url_for('index'))
+    return render_template('register.html')
+
 @app.route('/login/', methods=['POST'])
 def login():
     data = request.get_json()
@@ -52,6 +66,28 @@ def login():
         return jsonify({"msg": "Bad login"}), 401
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token), 200
+
+@app.route('/login_html', methods=['GET', 'POST'])
+def login_html():
+    if request.method == 'POST':
+        data = request.form
+        username = data.get("username")
+        password = data.get("password")
+        user = users.get(username)
+        if not user:
+            return '''
+            <p>Пользователя с таким именем не существует, проверьте правильность написания или создайте новый аккаунт</p>
+            <p><a href="/login_html">Назад</a></p>
+            '''
+        if not check_password_hash(user["password"], password):
+            return '''
+            <p>Неправильный пароль, попробуйте еще раз или создайте новый аккаунт</p> 
+            <p><a href="/login_html">Назад</a></p>
+            '''
+        token = create_access_token(identity=username)
+        session['token'] = token
+        return redirect(url_for('index'))
+    return render_template('login.html')
 
 @app.route('/workouts/', methods=['POST'])
 @jwt_required()
@@ -76,41 +112,23 @@ def get_my_workouts():
     user_workouts = [w for w in workouts if w["user_name"] == current_user]
     return jsonify(user_workouts), 200
 
-@app.route('/register_html', methods=['GET', 'POST'])
-def register_html():
-    if request.method == 'POST':
-        data = request.form
-        username = data.get("username")
-        if username in users:
-            return "User already exists"
-        users[username] = {
-            "password": generate_password_hash(data.get("password"))
-        }
-        save_users(users)
-        return redirect(url_for('index'))
-    return render_template('register.html')
+@app.route('/my_workouts_html')
+def get_my_workouts_html():
+    token = session.get('token')
+    if not token:
+        return redirect(url_for('login_html'))
 
-@app.route('/login_html', methods=['GET', 'POST'])
-def login_html():
-    if request.method == 'POST':
-        data = request.form
-        username = data.get("username")
-        password = data.get("password")
-        user = users.get(username)
-        if not user:
-            return '''
-            <p>Пользователя с таким именем не существует, проверьте правильность написания или создайте новый аккаунт</p>
-            <p><a href="/login_html">Назад</a></p>
-            '''
-        if not check_password_hash(user["password"], password):
-            return '''
-            <p>Неправильный пароль, попробуйте еще раз или создайте новый аккаунт</p> 
-            <p><a href="/login_html">Назад</a></p>
-            '''
-        token = create_access_token(identity=username)
-        session['token'] = token
-        return redirect(url_for('index'))
-    return render_template('login.html')
+    from flask_jwt_extended import decode_token
+    username = decode_token(token)['sub']
+
+    if "favorite_routes" not in users[username]:
+        users[username]["favorite_routes"] = []
+        save_users(users)
+
+    user_workouts = [w for w in workouts if w["user_name"] == username]
+    favorite_ids = users[username]["favorite_routes"]
+
+    return render_template("my_workouts.html", workouts=user_workouts, favorite_ids=favorite_ids)
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_html():
@@ -143,17 +161,6 @@ def upload_html():
 
     return render_template('upload.html')
 
-@app.route('/my_workouts_html')
-def my_workouts_html():
-    token = session.get('token')
-    if not token:
-        return redirect(url_for('login_html'))
-
-    from flask_jwt_extended import decode_token
-    identity = decode_token(token)['sub']
-
-    user_workouts = [w for w in workouts if w["user_name"] == identity]
-    return render_template('my_workouts.html', workouts=user_workouts)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
