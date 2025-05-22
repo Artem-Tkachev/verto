@@ -36,7 +36,8 @@ def register():
     if username in users:
         return jsonify({"msg": "User already exists"}), 400
     users[username] = {
-        "password": generate_password_hash(data.get("password"))
+        "password": generate_password_hash(data.get("password")),
+        "favorite_routes": []
     }
     save_users(users)
     return jsonify({"msg": "User registered"}), 201
