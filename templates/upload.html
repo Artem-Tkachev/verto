@@ -13,9 +13,32 @@
 
   <input name="distance" placeholder="Дистанция (км)" type="number" step="0.1" required><br>
   <input name="duration" placeholder="Продолжительность (мин)" type="number" required><br>
-  <input name="map" placeholder="Карта (текст или ссылка)" required><br>
+  <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+  <input type="hidden" name="map" id="map_data" required>
 
   <button type="submit">Загрузить</button>
 </form>
 
 <p><a href="/my_workouts_html">Посмотреть мои тренировки</a></p>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  let map = L.map('map').setView([55.75, 37.61], 10);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18
+  }).addTo(map);
+
+  let route = [];
+  let polyline = L.polyline(route, {color: 'red'}).addTo(map);
+
+  map.on('click', function(e) {
+    let latlng = e.latlng;
+    route.push([latlng.lat, latlng.lng]);
+    polyline.setLatLngs(route);
+
+    document.getElementById('map_data').value = JSON.stringify(route);
+  });
+</script>
