@@ -16,6 +16,11 @@
   <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
   <input type="hidden" name="map" id="map_data" required>
 
+  <div style="margin-top: 10px;">
+    <button type="button" onclick="undoPoint()">Отменить точку</button>
+    <button type="button" onclick="clearRoute()">Очистить маршрут</button>
+  </div>
+
   <button type="submit">Загрузить</button>
 </form>
 
@@ -28,17 +33,113 @@
   let map = L.map('map').setView([55.75, 37.61], 10);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18
+    maxZoom: 18,
+    attribution: ''
   }).addTo(map);
 
   let route = [];
-  let polyline = L.polyline(route, {color: 'red'}).addTo(map);
+  let dots = [];
+  let polyline = L.polyline([], {color: 'red'}).addTo(map);
+
+  function calculateDistance(coords) {
+    let total = 0;
+    for (let i = 1; i < coords.length; i++) {
+      total += map.distance(coords[i - 1], coords[i]);
+    }
+    return total / 1000;  // переводим в километры
+  }
 
   map.on('click', function(e) {
-    let latlng = e.latlng;
+    const latlng = e.latlng;
     route.push([latlng.lat, latlng.lng]);
+
+    // Удаляем старые точки
+    dots.forEach(circle => map.removeLayer(circle));
+    dots = [];
+
+    for (let i = 0; i < route.length; i++) {
+      const point = route[i];
+      const latlng = L.latLng(point[0], point[1]);
+      let color = 'gray';
+      let popup = `Точка ${i}`;
+
+      if (i === 0) {
+        color = 'green';
+        popup = 'Старт';
+      } else if (i === route.length - 1) {
+        color = 'red';
+        popup = 'Финиш';
+      }
+
+      const circle = L.circleMarker(latlng, {
+        radius: 6,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.9
+      }).bindPopup(popup).addTo(map);
+
+      dots.push(circle);
+    }
+
     polyline.setLatLngs(route);
 
     document.getElementById('map_data').value = JSON.stringify(route);
+
+    const distance = calculateDistance(route);
+    document.querySelector('input[name="distance"]').value = distance.toFixed(2);
   });
+
+  function updateRouteDisplay() {
+  dots.forEach(circle => map.removeLayer(circle));
+  dots = [];
+
+  for (let i = 0; i < route.length; i++) {
+    const point = route[i];
+    const latlng = L.latLng(point[0], point[1]);
+    let color = 'gray';
+    let popup = `Точка ${i}`;
+
+    if (i === 0) {
+      color = 'green';
+      popup = 'Старт';
+    } else if (i === route.length - 1) {
+      color = 'red';
+      popup = 'Финиш';
+    }
+
+    const circle = L.circleMarker(latlng, {
+      radius: 6,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.9
+    }).bindPopup(popup).addTo(map);
+
+    dots.push(circle);
+  }
+
+  polyline.setLatLngs(route);
+
+  const distance = calculateDistance(route);
+  document.getElementById('map_data').value = JSON.stringify(route);
+  document.querySelector('input[name="distance"]').value = distance.toFixed(2);
+}
+
+function undoPoint() {
+  if (route.length > 0) {
+    route.pop();
+    updateRouteDisplay();
+  }
+}
+
+function clearRoute() {
+  route = [];
+  updateRouteDisplay();
+}
+  
 </script>
+
+<style>
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+</style>
