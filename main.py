@@ -217,6 +217,24 @@ def show_favorites():
 
     return render_template('favorites.html', workouts=fav_workouts)
 
+@app.route('/route/<map_id>/leaderboard')
+def route_leaderboard(map_id):
+    sort_by = request.args.get("sort", "speed")
+
+    relevant_workouts = [w for w in workouts if w.get("map") == map_id]
+    if not relevant_workouts:
+        return f"Для маршрута {map_id} ещё нет тренировок."
+
+    for w in relevant_workouts:
+        w["speed"] = w["distance"] / w["duration"] if w["duration"] else 0
+
+    if sort_by == "duration":
+        leaderboard = sorted(relevant_workouts, key=lambda x: x["duration"])
+    else:
+        leaderboard = sorted(relevant_workouts, key=lambda x: x["speed"], reverse=True)
+
+    return render_template("leaderboard.html", map_id=map_id, leaderboard=leaderboard, sort_by=sort_by)
+
 if __name__ == '__main__':
     port = 8080
     app.run(app, host='0.0.0.0', port=port)

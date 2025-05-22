@@ -1,0 +1,25 @@
+<h2>Рейтинг по маршруту {{ map_id }}</h2>
+
+<form method="get">
+  <label for="sort">Сортировать по:</label>
+  <select name="sort" id="sort" onchange="this.form.submit()">
+    <option value="speed" {% if sort_by == 'speed' %}selected{% endif %}>Скорость</option>
+    <option value="duration" {% if sort_by == 'duration' %}selected{% endif %}>Время</option>
+  </select>
+</form>
+
+<ol>
+{% for w in leaderboard %}
+  <li>
+    {{ w.user_name }} —
+    {% if sort_by == 'speed' %}
+      {{ "%.2f"|format(w.speed) }} км/мин
+    {% else %}
+      {{ w.duration }} мин
+    {% endif %}
+    ({{ w.distance }} км за {{ w.duration }} мин)
+  </li>
+{% endfor %}
+</ol>
+
+<p><a href="/">На главную</a></p>

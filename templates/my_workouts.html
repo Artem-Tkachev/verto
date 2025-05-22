@@ -1,17 +1,15 @@
-<ul>
-{% for w in workouts %}
-  <li>
-    <b>{{ w.training_name }}</b> — {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин
+<li>
+  <b>{{ w.training_name }}</b> — {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин
 
-    <form method="post" action="/favorite/{{ w.id }}" style="display:inline;">
-      <button type="submit">
-        {% if w.id in favorite_ids %}
-          Убрать из избранного
-        {% else %}
-          В избранное
-        {% endif %}
-      </button>
-    </form>
-  </li>
-{% endfor %}
-</ul>
+  <form method="post" action="/favorite/{{ w.id }}">
+    <button type="submit">
+      {% if w.id in favorite_ids %}
+        Убрать из избранного
+      {% else %}
+        В избранное
+      {% endif %}
+    </button>
+  </form>
+
+  <a href="/route/{{ w.map }}/leaderboard">Рейтинг</a>
+</li>
