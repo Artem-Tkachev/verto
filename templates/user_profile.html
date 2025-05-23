@@ -3,7 +3,10 @@
 {% if workouts %}
   <ul>
     {% for w in workouts %}
-      <li>{{ w.training_name }} — {{ w.distance }} км, {{ w.duration }} мин</li>
+        <li>
+        <a href="/workout/{{ w.id }}">{{ w.training_name }}</a> —
+        {{ w.type }}, {{ w.distance }} км, {{ w.duration }} мин
+        </li>
     {% endfor %}
   </ul>
 {% else %}

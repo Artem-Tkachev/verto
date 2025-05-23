@@ -1,0 +1,21 @@
+<h2>{{ w.training_name }}</h2>
+
+<p>
+  Пользователь: <b>{{ w.user_name }}</b><br>
+  Тип: {{ w.type }}<br>
+  Дистанция: {{ w.distance }} км<br>
+  Время: {{ w.duration }} мин
+</p>
+
+{% if is_favorite %}
+  <form method="post" action="/favorite/{{ w.id }}">
+    <button type="submit">Убрать из избранного</button>
+  </form>
+{% else %}
+  <form method="post" action="/favorite/{{ w.id }}">
+    <button type="submit">Добавить в избранное</button>
+  </form>
+{% endif %}
+
+<p><a href="/route/{{ w.map }}/leaderboard">Рейтинг маршрута</a></p>
+<p><a href="/user/{{ w.user_name }}">Назад к профилю</a></p>

@@ -183,6 +183,29 @@ def view_workout(id):
 
     return render_template("view_workout.html", workout=workout)
 
+@app.route('/workout/<workout_id>')
+def view_workout(workout_id):
+    w = next((w for w in workouts if w["id"] == workout_id), None)
+    if not w:
+        return "Тренировка не найдена", 404
+
+    token = session.get("token")
+    from flask_jwt_extended import decode_token
+    username = None
+    if token:
+        try:
+            username = decode_token(token)["sub"]
+        except:
+            pass
+
+    is_favorite = False
+    if username and username in users:
+        is_favorite = w["id"] in users[username].get("favorite_routes", [])
+
+    return render_template("workout_view.html",
+                           w=w,
+                           is_favorite=is_favorite)
+
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
