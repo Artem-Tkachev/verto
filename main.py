@@ -305,36 +305,29 @@ def route_leaderboard(map_id):
 
 @app.route('/challenge/<workout_id>', methods=['POST'])
 def send_challenge(workout_id):
-    token = session.get('token')
+    token = session.get("token")
     if not token:
-        return redirect(url_for('login_html'))
+        return redirect(url_for("login_html"))
 
     from flask_jwt_extended import decode_token
-    sender = decode_token(token)['sub']
-    to_user = request.form.get("to_user")
+    from_user = decode_token(token)["sub"]
 
-    if to_user not in users:
+    to_user = request.form.get("to_user")
+    if not to_user or to_user not in users:
         return "Пользователь не найден", 404
 
-    challenge_id = str(uuid.uuid4())
-    challenge = {
-        "id": challenge_id,
-        "from": sender,
+    challenges = load_challenges()
+    new_challenge = {
+        "id": str(uuid.uuid4()),
+        "from": from_user,
         "to": to_user,
         "workout_id": workout_id,
-        "status": "pending",
-        "created_at": datetime.now().isoformat()
+        "status": "pending"
     }
-
-    challenges = load_challenges()
-    challenges.append(challenge)
+    challenges.append(new_challenge)
     save_challenges(challenges)
 
-    users[sender]["challenges"]["sent"].append(challenge_id)
-    users[to_user]["challenges"]["received"].append(challenge_id)
-    save_users(users)
-
-    return redirect(url_for('get_my_workouts_html'))
+    return redirect(url_for("view_challenges"))
     
 @app.route('/challenges')
 def view_challenges():
