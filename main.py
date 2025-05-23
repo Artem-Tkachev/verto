@@ -112,7 +112,6 @@ def upload_workout():
     return jsonify({"msg": "Workout saved"}), 201
 
 @app.route('/my_workouts/', methods=['GET'])
-@jwt_required()
 def get_my_workouts():
     current_user = get_jwt_identity()
     user_workouts = [w for w in workouts if w["user_name"] == current_user]
@@ -341,13 +340,39 @@ def decline_challenge(challenge_id):
 
 @app.route('/challenge/<challenge_id>/complete', methods=['POST'])
 def complete_challenge(challenge_id):
+    token = session.get('token')
+    if not token:
+        return redirect(url_for('login_html'))
+    
+    from flask_jwt_extended import decode_token
+    user = decode_token(token)['sub']
+
     challenges = load_challenges()
+    workouts_list = load_workouts()
+
     for c in challenges:
         if c["id"] == challenge_id:
-            c["status"] = "completed"
+            if c["status"] not in ["accepted", "completed"]:
+                return "Челлендж не принят или уже завершён", 400
+
+            matching = [w for w in workouts_list if w["user_name"] == user and w["map"] == c["workout_id"]]
+            if not matching:
+                return "Сначала пройди маршрут", 400
+
+            best = sorted(matching, key=lambda w: w["duration"])[0]
+
+            if "completed_by" not in c:
+                c["completed_by"] = {}
+
+            c["completed_by"][user] = best["id"]
+
+            if len(c["completed_by"]) == 2:
+                c["status"] = "completed"
+
             save_challenges(challenges)
-            break
-    return redirect(url_for('view_challenges'))
+            return redirect(url_for('view_challenges'))
+    
+    return "Челлендж не найден", 404
 
 
 if __name__ == '__main__':
