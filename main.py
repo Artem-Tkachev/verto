@@ -317,7 +317,7 @@ def view_challenges():
     sent = [c for c in challenges if c["id"] in user.get("challenges", {}).get("sent", [])]
     received = [c for c in challenges if c["id"] in user.get("challenges", {}).get("received", [])]
 
-    return render_template("challenges.html", sent=sent, received=received, username=username)
+    return render_template("challenges.html", sent=sent, received=received, username=username, get_workout_title=get_workout_title)
 
 @app.route('/challenge/<challenge_id>/accept', methods=['POST'])
 def accept_challenge(challenge_id):
@@ -374,6 +374,11 @@ def complete_challenge(challenge_id):
             return redirect(url_for('view_challenges'))
     
     return "Челлендж не найден", 404
+
+def get_workout_title(wid):
+    workouts = load_workouts()
+    w = next((w for w in workouts if w["id"] == wid), None)
+    return w["training_name"] if w else wid
 
 @app.route('/challenge/<challenge_id>')
 def view_challenge(challenge_id):
