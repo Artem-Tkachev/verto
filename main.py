@@ -190,6 +190,15 @@ def search():
         return redirect(url_for('public_workouts', username=username))
     return render_template('search.html')
 
+@app.route('/api/search_users')
+def api_search_users():
+    query = request.args.get('q', '').lower()
+    if not query:
+        return jsonify([])
+
+    matches = [u for u in users.keys() if u.lower().startswith(query)]
+    return jsonify(matches[:10])
+
 @app.route('/public/<username>')
 def public_workouts(username):
     if username not in users:

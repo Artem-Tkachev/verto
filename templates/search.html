@@ -1,7 +1,34 @@
-<h2>Поиск тренировок по имени пользователя</h2>
-<form method="post">
-  <input name="username" placeholder="Имя пользователя" required>
-  <button type="submit">Найти</button>
-</form>
+<h2>Поиск пользователей</h2>
+
+<input type="text" id="search" placeholder="Начни вводить имя...">
+<ul id="results"></ul>
 
 <p><a href="/">На главную</a></p>
+
+<script>
+  const input = document.getElementById('search');
+  const results = document.getElementById('results');
+
+  input.addEventListener('input', () => {
+    const query = input.value.trim();
+    if (query.length === 0) {
+      results.innerHTML = '';
+      return;
+    }
+
+    fetch(`/api/search_users?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        results.innerHTML = '';
+        if (data.length === 0) {
+          results.innerHTML = '<li>Ничего не найдено</li>';
+        } else {
+          data.forEach(user => {
+            const li = document.createElement('li');
+            li.innerHTML = <a href="/user/${user}">${user}</a>;
+            results.appendChild(li);
+          });
+        }
+      });
+  });
+</script>
