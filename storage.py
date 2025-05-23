@@ -24,3 +24,15 @@ def load_workouts():
 def save_workouts(workouts):
     with open(WORKOUTS_FILE, 'w') as f:
         json.dump(workouts, f)
+
+CHALLENGES_FILE = 'challenges.json'
+
+def load_challenges():
+    if os.path.exists(CHALLENGES_FILE):
+        with open(CHALLENGES_FILE, 'r') as f:
+            return json.load(f)
+    return []
+
+def save_challenges(challenges):
+    with open(CHALLENGES_FILE, 'w') as f:
+        json.dump(challenges, f)

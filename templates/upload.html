@@ -46,14 +46,13 @@
     for (let i = 1; i < coords.length; i++) {
       total += map.distance(coords[i - 1], coords[i]);
     }
-    return total / 1000;  // переводим в километры
+    return total / 1000;
   }
 
   map.on('click', function(e) {
     const latlng = e.latlng;
     route.push([latlng.lat, latlng.lng]);
 
-    // Удаляем старые точки
     dots.forEach(circle => map.removeLayer(circle));
     dots = [];
 

@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify, render_template, redirect, session, url_for
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
-from storage import load_users, save_users, load_workouts, save_workouts
+from storage import load_users, save_users, load_workouts, save_workouts, load_challenges, save_challenges
+import uuid
+from datetime import datetime
 
 app = Flask('verto')
 app.config['JWT_SECRET_KEY'] = 'super-secret-key'
@@ -37,7 +39,11 @@ def register():
         return jsonify({"msg": "User already exists"}), 400
     users[username] = {
         "password": generate_password_hash(data.get("password")),
-        "favorite_routes": []
+        "favorite_routes": [],
+        "challenges": {
+            "sent": [],
+            "received": []
+        }
     }
     save_users(users)
     return jsonify({"msg": "User registered"}), 201
@@ -161,6 +167,21 @@ def upload_html():
 
     return render_template('upload.html')
 
+import json
+
+@app.route('/workout/<id>')
+def view_workout(id):
+    workout = next((w for w in workouts if w["id"] == id), None)
+    if not workout:
+        return "Тренировка не найдена", 404
+
+    if isinstance(workout["map"], str):
+        try:
+            workout["map"] = json.loads(workout["map"])
+        except:
+            workout["map"] = []
+
+    return render_template("view_workout.html", workout=workout)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -234,6 +255,40 @@ def route_leaderboard(map_id):
         leaderboard = sorted(relevant_workouts, key=lambda x: x["speed"], reverse=True)
 
     return render_template("leaderboard.html", map_id=map_id, leaderboard=leaderboard, sort_by=sort_by)
+
+
+@app.route('/challenge/<to_user>/<workout_id>', methods=['POST'])
+def send_challenge(to_user, workout_id):
+    token = session.get('token')
+    if not token:
+        return redirect(url_for('login_html'))
+
+    from flask_jwt_extended import decode_token
+    sender = decode_token(token)['sub']
+
+    if to_user not in users:
+        return "Пользователь не найден", 404
+
+    challenge_id = str(uuid.uuid4())
+    challenge = {
+        "id": challenge_id,
+        "from": sender,
+        "to": to_user,
+        "workout_id": workout_id,
+        "status": "pending",
+        "created_at": datetime.now().isoformat()
+    }
+
+    challenges = load_challenges()
+    challenges.append(challenge)
+    save_challenges(challenges)
+
+    users[sender]["challenges"]["sent"].append(challenge_id)
+    users[to_user]["challenges"]["received"].append(challenge_id)
+    save_users(users)
+
+    return redirect(url_for('get_my_workouts_html'))
+
 
 if __name__ == '__main__':
     port = 8080

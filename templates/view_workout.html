@@ -1,0 +1,37 @@
+<h2>{{ workout.training_name }}</h2>
+<p>Тип: {{ workout.type }}</p>
+<p>Дистанция: {{ workout.distance }} км</p>
+<p>Время: {{ workout.duration }} мин</p>
+
+<div id="route_map" style="height: 400px; margin: 20px 0;"></div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    const coords = JSON.parse('{{ workout.map | tojson | safe }}');
+
+  const trainingMap = L.map('route_map').setView(coords[0], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: ''
+  }).addTo(trainingMap);
+
+  const polyline = L.polyline(coords, { color: 'blue' }).addTo(trainingMap);
+  trainingMap.fitBounds(polyline.getBounds());
+
+  coords.forEach((point, i) => {
+    let popup = `Точка ${i}`;
+    if (i === 0) popup = "Старт";
+    else if (i === coords.length - 1) popup = "Финиш";
+
+    L.circleMarker(point, {
+      radius: 5,
+      color: (i === 0) ? 'green' : (i === coords.length - 1 ? 'red' : 'gray'),
+      fillOpacity: 0.9
+    }).bindPopup(popup).addTo(trainingMap);
+  });
+</script>
+
+<p><a href="/my_workouts_html">Назад</a></p>
