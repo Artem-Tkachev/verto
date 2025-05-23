@@ -199,6 +199,14 @@ def api_search_users():
     matches = [u for u in users.keys() if u.lower().startswith(query)]
     return jsonify(matches[:10])
 
+@app.route('/user/<username>')
+def view_user(username):
+    if username not in users:
+        return "Пользователь не найден", 404
+
+    user_workouts = [w for w in workouts if w["user_name"] == username]
+    return render_template("user_profile.html", username=username, workouts=user_workouts)
+
 @app.route('/public/<username>')
 def public_workouts(username):
     if username not in users:
