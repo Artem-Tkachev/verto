@@ -375,6 +375,24 @@ def complete_challenge(challenge_id):
     
     return "Челлендж не найден", 404
 
+@app.route('/challenge/<challenge_id>')
+def view_challenge(challenge_id):
+    challenges = load_challenges()
+    workouts_list = load_workouts()
+
+    challenge = next((c for c in challenges if c["id"] == challenge_id), None)
+    if not challenge:
+        return "Челлендж не найден", 404
+
+    result = {}
+    if challenge.get("completed_by"):
+        for username, workout_id in challenge["completed_by"].items():
+            workout = next((w for w in workouts_list if w["id"] == workout_id), None)
+            if workout:
+                result[username] = workout
+
+    return render_template("challenge_result.html", challenge=challenge, result=result)
+
 
 if __name__ == '__main__':
     port = 8080

@@ -1,0 +1,39 @@
+<h2>Челлендж между {{ challenge.from }} и {{ challenge.to }}</h2>
+<p>Статус: {{ challenge.status }}</p>
+
+{% if result %}
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>Пользователь</th>
+      <th>Дистанция</th>
+      <th>Время</th>
+      <th>Скорость</th>
+    </tr>
+    {% for username, workout in result.items() %}
+    <tr>
+      <td>{{ username }}</td>
+      <td>{{ workout.distance }} км</td>
+      <td>{{ workout.duration }} мин</td>
+      <td>{{ "%.2f"|format(workout.distance / workout.duration) }} км/мин</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if result|length == 2 %}
+    <h3>
+    {% set u1, u2 = result.keys()|list %}
+    {% set w1, w2 = result[u1], result[u2] %}
+    {% if w1["duration"] < w2["duration"] %}
+      Победил {{ u1 }}
+    {% elif w2["duration"] < w1["duration"] %}
+      Победил {{ u2 }}
+    {% else %}
+      Ничья!
+    {% endif %}
+    </h3>
+  {% endif %}
+{% else %}
+  <p>Пока никто не завершил маршрут</p>
+{% endif %}
+
+<p><a href="/challenges">Назад</a></p>
