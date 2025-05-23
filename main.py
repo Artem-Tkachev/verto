@@ -257,14 +257,15 @@ def route_leaderboard(map_id):
     return render_template("leaderboard.html", map_id=map_id, leaderboard=leaderboard, sort_by=sort_by)
 
 
-@app.route('/challenge/<to_user>/<workout_id>', methods=['POST'])
-def send_challenge(to_user, workout_id):
+@app.route('/challenge/<workout_id>', methods=['POST'])
+def send_challenge(workout_id):
     token = session.get('token')
     if not token:
         return redirect(url_for('login_html'))
 
     from flask_jwt_extended import decode_token
     sender = decode_token(token)['sub']
+    to_user = request.form.get("to_user")
 
     if to_user not in users:
         return "Пользователь не найден", 404
@@ -288,6 +289,7 @@ def send_challenge(to_user, workout_id):
     save_users(users)
 
     return redirect(url_for('get_my_workouts_html'))
+    
 
 
 if __name__ == '__main__':
