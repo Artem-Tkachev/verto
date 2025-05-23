@@ -112,7 +112,7 @@ def upload_workout():
     return jsonify({"msg": "Workout saved"}), 201
 
 @app.route('/my_workouts/', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_my_workouts():
     current_user = get_jwt_identity()
     user_workouts = [w for w in workouts if w["user_name"] == current_user]
