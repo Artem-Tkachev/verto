@@ -390,7 +390,6 @@ def complete_challenge(challenge_id):
     return "Челлендж не найден", 404
 
 def get_workout_title(wid):
-    workouts = load_workouts()
     w = next((w for w in workouts if w["id"] == wid), None)
     return w["training_name"] if w else wid
 
