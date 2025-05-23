@@ -263,6 +263,8 @@ def route_leaderboard(map_id):
     if not relevant_workouts:
         return f"Для маршрута {map_id} ещё нет тренировок."
 
+    route_title = relevant_workouts[0].get("training_name", map_id)
+
     for w in relevant_workouts:
         w["speed"] = w["distance"] / w["duration"] if w["duration"] else 0
 
@@ -271,7 +273,11 @@ def route_leaderboard(map_id):
     else:
         leaderboard = sorted(relevant_workouts, key=lambda x: x["speed"], reverse=True)
 
-    return render_template("leaderboard.html", map_id=map_id, leaderboard=leaderboard, sort_by=sort_by)
+    return render_template("leaderboard.html",
+                           map_id=map_id,
+                           leaderboard=leaderboard,
+                           sort_by=sort_by,
+                           route_title=route_title)
 
 
 @app.route('/challenge/<workout_id>', methods=['POST'])
