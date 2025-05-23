@@ -310,6 +310,36 @@ def view_challenges():
 
     return render_template("challenges.html", sent=sent, received=received, username=username)
 
+@app.route('/challenge/<challenge_id>/accept', methods=['POST'])
+def accept_challenge(challenge_id):
+    challenges = load_challenges()
+    for c in challenges:
+        if c["id"] == challenge_id:
+            c["status"] = "accepted"
+            save_challenges(challenges)
+            break
+    return redirect(url_for('view_challenges'))
+
+@app.route('/challenge/<challenge_id>/decline', methods=['POST'])
+def decline_challenge(challenge_id):
+    challenges = load_challenges()
+    for c in challenges:
+        if c["id"] == challenge_id:
+            c["status"] = "declined"
+            save_challenges(challenges)
+            break
+    return redirect(url_for('view_challenges'))
+
+@app.route('/challenge/<challenge_id>/complete', methods=['POST'])
+def complete_challenge(challenge_id):
+    challenges = load_challenges()
+    for c in challenges:
+        if c["id"] == challenge_id:
+            c["status"] = "completed"
+            save_challenges(challenges)
+            break
+    return redirect(url_for('view_challenges'))
+
 
 if __name__ == '__main__':
     port = 8080

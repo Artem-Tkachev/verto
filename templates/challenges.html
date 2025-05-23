@@ -5,7 +5,20 @@
   <ul>
   {% for c in received %}
     <li>
-      От <b>{{ c.from }}</b> — маршрут ID: {{ c.workout_id }} — статус: {{ c.status }}
+      От <b>{{ c.from }}</b> — маршрут: {{ c.workout_id }} — статус: {{ c.status }}
+
+      {% if c.status == 'pending' %}
+        <form method="post" action="/challenge/{{ c.id }}/accept" style="display:inline;">
+          <button type="submit">Принять</button>
+        </form>
+        <form method="post" action="/challenge/{{ c.id }}/decline" style="display:inline;">
+          <button type="submit">Отклонить</button>
+        </form>
+      {% elif c.status == 'accepted' %}
+        <form method="post" action="/challenge/{{ c.id }}/complete" style="display:inline;">
+          <button type="submit">Завершить</button>
+        </form>
+      {% endif %}
     </li>
   {% endfor %}
   </ul>
