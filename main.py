@@ -184,7 +184,7 @@ def view_workout(id):
     return render_template("view_workout.html", workout=workout)
 
 @app.route('/workout/<workout_id>')
-def view_workout(workout_id):
+def workout_page(workout_id):
     w = next((w for w in workouts if w["id"] == workout_id), None)
     if not w:
         return "Тренировка не найдена", 404
