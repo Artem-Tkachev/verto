@@ -25,7 +25,7 @@
         } else {
           data.forEach(user => {
             const li = document.createElement('li');
-            li.innerHTML = <a href="/user/${user}">${user}</a>;
+            li.innerHTML = `<a href="/user/${user}">${user}</a>`;
             results.appendChild(li);
           });
         }
