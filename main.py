@@ -290,6 +290,25 @@ def send_challenge(workout_id):
 
     return redirect(url_for('get_my_workouts_html'))
     
+@app.route('/challenges')
+def view_challenges():
+    token = session.get('token')
+    if not token:
+        return redirect(url_for('login_html'))
+
+    from flask_jwt_extended import decode_token
+    username = decode_token(token)['sub']
+
+    user = users.get(username)
+    if not user:
+        return "Пользователь не найден", 404
+
+    challenges = load_challenges()
+
+    sent = [c for c in challenges if c["id"] in user.get("challenges", {}).get("sent", [])]
+    received = [c for c in challenges if c["id"] in user.get("challenges", {}).get("received", [])]
+
+    return render_template("challenges.html", sent=sent, received=received, username=username)
 
 
 if __name__ == '__main__':

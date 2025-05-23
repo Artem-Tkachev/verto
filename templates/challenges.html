@@ -1,0 +1,29 @@
+<h2>Мои челленджи</h2>
+
+<h3>Полученные</h3>
+{% if received %}
+  <ul>
+  {% for c in received %}
+    <li>
+      От <b>{{ c.from }}</b> — маршрут ID: {{ c.workout_id }} — статус: {{ c.status }}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>Нет входящих челленджей</p>
+{% endif %}
+
+<h3>Отправленные</h3>
+{% if sent %}
+  <ul>
+  {% for c in sent %}
+    <li>
+      Кому: <b>{{ c.to }}</b> — маршрут ID: {{ c.workout_id }} — статус: {{ c.status }}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>Нет отправленных челленджей</p>
+{% endif %}
+
+<p><a href="/">На главную</a></p>
